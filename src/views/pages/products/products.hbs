@@ -1,0 +1,72 @@
+{{> navbar}}
+
+<div class="wrapper mt-5">
+    <div class="content" role="main">
+        <div class="mt-5 text-center">
+            <div class="alert alert-danger mt-4 d-none" id="error-alert">{{error}}</div>
+
+            <h1 class="three-d-text" id="category-name"></h1>
+            <input type="hidden" id="category-id" value="{{category.code}}">
+
+            <div class="row mt-3">
+                <div class="col-12 d-flex justify-content-center gap-2">
+                    <a type="button" class="btn btn-sm btn-light" href="/products">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <button type="button" class="btn btn-sm btn-light" id="refresh-products">
+                        <i class="fas fa-sync"></i>
+                    </button>
+                    <a type="button" class="btn btn-sm btn-light" href="/products/add">
+                        <i class="fas fa-plus"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-bar mt-4 d-flex justify-content-center">
+                <form id="search-form" class="form-inline w-100" style="max-width: 500px;">
+                    <div class="input-group">
+                        <input type="text" id="searchInput" name="search" class="form-control" placeholder="חפש מוצר..."
+                            value="{{searchQuery}}">
+                        <i class=" btn fa fa-search btn-primary"></i>
+                    </div>
+                </form>
+            </div>
+            <div class="loading-dots" id="loading">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+            <!-- Products Section -->
+            <div class="container mt-5" id="products-container"></div>
+            <!-- Zoom Modal -->
+            <div class="modal fade" id="imageZoomModal" tabindex="-1" aria-hidden="true" dir="rtl">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-light">
+                            <h5 class="modal-title" id="modalTitle"></h5>
+                            <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"
+                                aria-label="סגור"></button>
+                        </div>
+                        <div class="modal-body text-end">
+                            <div class="mb-3">
+                                <h6 class="fw-bold">קוד מוצר: <span id="modalCode" class="text-primary"></span></h6>
+                                <h6 class="fw-bold">קוד קטגוריה: <span class="text-secondary">{{category.code}}</span>
+                                </h6>
+                                <h6 class="fw-bold">שם קטגוריה: <span class="text-secondary">{{category.name}}</span>
+                                </h6>
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <img id="modalImage" class="img-fluid rounded shadow-lg" style="max-height: 75vh;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="module" src="/javascript/products.js"></script>

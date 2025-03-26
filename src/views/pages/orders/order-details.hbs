@@ -1,0 +1,213 @@
+{{> navbar}}
+
+<div class="wrapper mt-5">
+    <div class="content" role="main">
+        <div class="container mt-5">
+            <div class="card shadow-lg border-0 rounded-4 p-4">
+                <h2 class="text-center mb-4 fw-bold">פרטי הזמנה</h2>
+                <div class="row mt-3">
+                    <div class="col-12 d-flex justify-content-center gap-2">
+                        <a type="button" id="back-btn" class="btn btn-sm btn-light" href="/orders">
+                            <i class="fas fa-arrow-left"></i>
+                        </a>
+                        <button type="button" class="btn btn-sm btn-light" id="refresh-btn">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        </div>
+                        <div class="loading-dots" id="loading">
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                        </div>
+                        <div id="order">
+                            <div class="mb-3"> <strong>מספר הזמנה: :</strong>
+                                <span id="order-number">{{orderId}}</span>
+                            </div>
+                            <div class="mb-3"> <strong>מספר לקוח:</strong>
+                                <span id="customer-number"></span>
+                            </div>
+                            <!-- Order Status -->
+                            <div class="mb-3">
+                                <strong>סטטוס הזמנה:</strong>
+                                <span id="order-status" class="badge bg-info text-dark px-3 py-2"></span>
+                                <div id="status-dropdown-container" class="d-none">
+                                    <select id="status-dropdown" class="form-select">
+                                        <!-- Options will be dynamically added -->
+                                    </select>
+                                    <button class="btn btn-success btn-sm mt-2" id="save-status-btn">שמירה</button>
+                                    <button class="btn btn-secondary btn-sm mt-2" id="cancel-status-btn">ביטול</button>
+                                </div>
+                                <button class="btn btn-outline-primary btn-sm ms-2" id="edit-status-btn">
+                                    <i class="fa fa-edit"></i>
+                                </button>
+                            </div>
+
+                            <!-- Notes Section -->
+                            <div class="mb-3">
+                                <strong>הערות:</strong>
+                                <textarea id="notes" class="form-control rounded-3" rows="3"
+                                    readonly>{{order.notes}}</textarea>
+                                <button class="btn btn-outline-secondary btn-sm mt-2" onclick="editNotes()">
+                                    <i class="fa fa-edit"></i> עריכה
+                                </button>
+                            </div>
+
+                            <!-- Upload Image -->
+                            <div class="mb-3">
+                                <strong>תמונות הזמנה:</strong>
+                                <div id="order-img" class="d-flex gap-2 flex-wrap">
+                                    <!-- Images will be displayed here -->
+                                </div>
+                                <input type="file" id="image-upload" class="form-control mt-2 d-none" multiple>
+                                <button class="btn btn-outline-dark btn-sm mt-2" id="upload-btn">
+                                    <i class="fa fa-upload"></i> Upload
+                                </button>
+                            </div>
+
+
+                            <!-- Products List -->
+                            <h3 class="mt-4 fw-bold text-success">מוצרים</h3>
+                            <button class="btn btn-success btn-sm mb-3" onclick="toggleAddProduct()">
+                                <i class="fa fa-plus"></i> הוסף מוצר
+                            </button>
+                            <div id="add-product-form" class="border p-3 rounded bg-light d-none">
+                                <label for="product-select" class="form-label">בחר מוצר:</label>
+                                <select id="product-select" class="form-select">
+                                    {{#each availableProducts}}
+                                    <option value="{{this.code}}">{{this.name}}</option>
+                                    {{/each}}
+                                </select>
+                                <input type="number" id="product-quantity" class="form-control mt-2" placeholder="כמות"
+                                    min="1" value="1">
+                                <button class="btn btn-primary btn-sm mt-2" id="add-product">הוסף מוצר</button>
+                            </div>
+                            <ul class="list-group mt-3">
+                                {{#each order.products}}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span class="fw-semibold">{{this.name}} - {{this.quantity}}</span>
+                                    <button class="btn btn-danger btn-sm"
+                                        onclick="removeProduct('{{../order.orderNumber}}', '{{this.code}}')">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </li>
+                                {{/each}}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="/javascript/order-details.js" type="module"></script>
+
+        <style>
+            /* Optional styling for the dropdown container */
+            #status-dropdown-container {
+                margin-top: 10px;
+            }
+
+            #status-dropdown {
+                max-width: 200px;
+            }
+
+            #save-status-btn,
+            #cancel-status-btn {
+                margin-left: 10px;
+            }
+
+            #status-chip-container {
+                display: flex;
+                flex-wrap: wrap;
+                /* Allow wrapping when needed */
+                gap: 10px;
+                /* Space between chips */
+                justify-content: start;
+                /* Align chips to the left */
+            }
+
+            /* Style for each chip */
+            .chip {
+                padding: 8px 16px;
+                border-radius: 20px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+            /* Highlighting the selected chip */
+            .chip.active {
+                background-color: #007bff;
+                /* Blue background */
+                color: white;
+                border-color: #007bff;
+                /* Matching border color */
+            }
+
+            /* Responsive adjustments for smaller screens */
+            @media (max-width: 768px) {
+                #status-chip-container {
+                    flex-direction: column;
+                    /* Stack chips vertically on smaller screens */
+                    gap: 5px;
+                }
+            }
+
+            .cursor-pointer {
+                cursor: pointer;
+            }
+
+            .order-container {
+                margin: 30px;
+            }
+
+            .order-header {
+                text-align: center;
+            }
+
+            .order-items li {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .order-items li button {
+                background-color: #f44336;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
+            .order-items li button:hover {
+                background-color: #d32f2f;
+            }
+
+            .edit-btn {
+                background-color: #4caf50;
+                color: white;
+            }
+
+            .upload-btn {
+                background-color: #2196f3;
+                color: white;
+            }
+
+            .list-group-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .btn-sm {
+                font-size: 0.85rem;
+            }
+
+            .img-thumbnail {
+                border-radius: 10px;
+                max-width: 100%;
+            }
+
+            .card {
+                background: #f8f9fa;
+            }
+        </style>

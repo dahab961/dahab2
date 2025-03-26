@@ -1,0 +1,22 @@
+{{> navbar}}
+
+<div class="wrapper mt-5">
+  <div class="content" role="main">
+    <div class=" mt-5 mb-5 text-center">
+      <div class=" p-3"></div>
+        <img src="/images/company-image.png" class="img-fluid border border-dark rounded-5 rounded  " alt="Logo" width="768" height="432">
+      </div>
+      <h1 class="three-d-text"> ברוכים הבאים למערכת <span style="color: #BA994A;">RSR Trade</span>
+
+      </h1>
+    </div>
+
+    {{#each cards as |card|}}
+    <div class="card-container">
+      <a class="animated-card" href="{{card.link}}">
+        <img src="{{card.img}}" class="card-img-top img-fluid" alt="Image">
+        <h5 class="card-title">{{card.title}}</h5>
+      </a>
+    </div>
+    {{/each}}
+  </div>

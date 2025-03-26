@@ -1,0 +1,74 @@
+{{> navbar}}
+
+<div class="wrapper mt-5">
+    <div class="content" role="main">
+        <div class="mt-5 text-center">
+            <div class="alert alert-danger mt-4 d-none" id="error-alert">{{error}}</div>
+
+            <h1 class="three-d-text">לקוחות</h1>
+
+            <div class="row mt-3">
+                <div class="col-12 d-flex justify-content-center gap-2">
+                    <a type="button" class="btn btn-sm btn-light" href="/">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <button type="button" class="btn btn-sm btn-light" id="refresh-btn">
+                        <i class="fas fa-sync"></i>
+                    </button>
+                    <a type="button" class="btn btn-sm btn-light" href="/customers/add">
+                        <i class="fas fa-plus"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-bar mt-4 d-flex justify-content-center">
+                <form id="search-form" class="form-inline w-100" style="max-width: 500px;">
+                    <div class="input-group">
+                        <input type="text" id="searchInput" name="search" class="form-control"
+                            placeholder="חפש לקוח לפי שם או מספר מזהה" value="{{searchQuery}}">
+                        <i class=" btn fa fa-search btn-primary"></i>
+                    </div>
+                </form>
+            </div>
+
+            <div class="loading-dots" id="loading">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+            <!-- users Section -->
+            <div class="container mt-5" id="users-container"></div>
+            <!-- Materials Section -->
+            <div class="container mt-5" id="materials-container"></div>
+            <div class="modal fade" id="userZoomModal" tabindex="-1" aria-hidden="true" dir="rtl">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="btn-close ms-end" data-bs-dismiss="modal"
+                                aria-label="סגור"></button>
+                            <h5 class="modal-title" id="modalTitle"></h5>
+                        </div>
+                        <div class="modal-body text-center">
+                            <div id="customerInfo">
+                                <p><strong>מס' לקוח:</strong> <span id="customerNO"></span></p>
+                                <p><strong>שם פרטי:</strong> <span id="firstName"></span></p>
+                                <p><strong>שם משפחה:</strong> <span id="lastName"></span></p>
+                                <p><strong>מספר טלפון ☎️:</strong> <span id="phone"></span></p>
+                                <p><strong>מייל ✉:</strong> <span id="email"></span></p>
+                                <p><strong>כתובת 📍:</strong> <span id="address"></span></p>
+                            </div>
+                            <img id="modalImage" class="img-fluid rounded shadow" style="max-height: 80vh;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+</div>
+
+
+
+<script type="module" src="/javascript/users.js"></script>

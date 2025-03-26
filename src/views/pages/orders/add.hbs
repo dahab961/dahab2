@@ -1,0 +1,113 @@
+{{> navbar}}
+
+<div class="wrapper mt-5">
+    <div class="content" role="main">
+        <div class="mt-5 col-12 col-md-6 mx-auto">
+            <h1 class="three-d-text text-center">הוספת הזמנה חדשה</h1>
+            <form id="orderForm" novalidate>
+                <div id="first-step-form" class="container mt-3">
+                    <h4 class="text-center mb-4">שלב 1: בחירת לקוח</h4>
+
+                    <div class="mb-3">
+                        <label for="customerName" class="form-label fw-bold">שם לקוח</label>
+                        <div class="position-relative">
+                            <input type="text" class="form-control" id="searchCustomer" placeholder="חפש לקוח...">
+                            <div id="customerList" class="list-group position-absolute w-100 mt-1 shadow-sm d-none"
+                                style="z-index: 1000; max-height: 250px; overflow-y: auto;">
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="d-flex flex-wrap gap-2 justify-content-between mt-3">
+                        <button type="button" class="btn btn-secondary prev-step">הקודם</button>
+                        <button type="button" class="btn btn-primary next-step" id="nextToStep2" disabled>הבא</button>
+                    </div>
+
+                </div>
+
+                <div id="second-step-form" class="d-none">
+                    <h4 class="text-center">שלב 2: פרטי הזמנה</h4>
+                    <div class="mb-3">
+                        <label for="orderId" class="form-label">מס' הזמנה</label>
+                        <input type="text" class="bg-warning form-control" id="orderId" name="orderId" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">סטטוס</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="חדשה">חדשה</option>
+                            <option value="בהכנה">בהכנה</option>
+                            <option value="הושלמה">הושלמה</option>
+                        </select>
+                        <div class="invalid-feedback">נא לבחור סטטוס</div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 justify-content-between mt-3">
+
+                        <button type="button" class="btn btn-secondary prev-step" id="prev-step2">הקודם</button>
+                        <button type="button" class="btn btn-primary next-step" id="nextToStep3">הבא</button>
+                    </div>
+                </div>
+
+                <div id="third-step-form" class="d-none">
+                    <h4 class="text-center">שלב 3: בחירת מוצרים</h4>
+                    <button type="button" class="btn btn-outline-secondary w-100" data-bs-toggle="modal"
+                        data-bs-target="#productModal">
+                        בחר מוצרים
+                    </button>
+
+                    <div class="mt-3">
+                        <label for="orderDetails" class="form-label">פירוט הזמנה</label>
+                        <textarea class="form-control" id="orderDetails" name="orderDetails" rows="3"></textarea>
+                    </div>
+
+                    <div class="mt-3">
+                        <label for="notes" class="form-label">הערות</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                    </div>
+                    <p id="error" class="d-none"></p>
+                    <div class="d-flex flex-wrap gap-2 justify-content-between mt-3">
+                        <button type="button" class="btn btn-secondary prev-step" id="prev-step4">הקודם</button>
+                        <button type="submit" class="btn btn-primary next-step" id="submit-btn" disabled>הוספה</button>
+                    </div>
+                </div>
+                <div class="loading-dots d-none" id="loading">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<!-- Product Selection Modal -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalLabel">בחר מוצרים</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="productList" class="list-group"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+    <!-- Toast -->
+    <div id="toastMessage" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive"
+        aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                הזמנה נשלחה בהצלחה!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="/javascript/add-order.js"></script>

@@ -1,0 +1,453 @@
+  /******************************************************************************
+  START Glitch hello-app default styles
+
+  The styles in this section do some minimal CSS resets, set default fonts and 
+  colors, and handle the layout for our footer and "Remix on Glitch" button. If
+  you're new to CSS they may seem a little complicated, but you can scroll down
+  to this section's matching END comment to see page-specific styles.
+  ******************************************************************************/
+  /* Our default values set as CSS variables */
+  :root {
+    --color-bg: #BDC9FF;
+    --color-text-main: #000000;
+    --color-primary: #AFECE0;
+    --wrapper-height: 87vh;
+    --image-max-width: 300px;
+    --image-margin: 3rem;
+    --font-family: "HK Grotesk";
+    --font-family-header: "HK Grotesk";
+  }
+
+  .three-d-text {
+    font-family: 'HK Grotesk', sans-serif;
+    color: var(--color-text-header);
+    text-align: center;
+    margin: 2rem 0;
+  }
+
+  .cards-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    /* Adjust space between cards */
+  }
+
+  button {
+    background-color: #6200ea;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+
+    &:hover {
+      background-color: #3700b3;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    &:active {
+      background-color: #1a0080;
+      transform: scale(0.98);
+    }
+
+    &:disabled {
+      background-color: #e0e0e0;
+      color: #9e9e9e;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+  }
+
+  .card-container {
+    flex: 1 1;
+    margin-bottom: 5rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  .order-card {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  }
+
+  .card .card-img {
+    width: 100%;
+    height: 200px; /* Fixed height for grid items */
+    object-fit: cover;
+    border-radius: 10px;
+    transition: transform 0.3s ease-in-out;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      height: 150px; /* Adjusted height for smaller screens */
+      margin: 0 auto;
+    }
+  }
+  .card:hover card-img {
+    transform: scale(1.05);
+  }
+  .order-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.15);
+  }
+
+  .order-card img {
+    width: 100%;
+    height: 180px;
+    border-radius: 12px;
+    object-fit: cover;
+  }
+
+  .order-card .order-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 10px;
+  }
+
+  .order-card .order-info {
+    font-size: 14px;
+    color: #666;
+    margin-top: 5px;
+  }
+
+
+  .animated-card2 {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+    transform-style: preserve-3d;
+  }
+
+  .animated-card2 img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease-in-out;
+  }
+
+  .animated-card2:hover img {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.6), 0 0 40px rgba(255, 255, 255, 0.4);
+  }
+
+  .animated-card2:hover {
+    border: 3px solid #2f2e2e;
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.6), 0 0 40px rgba(255, 255, 255, 0.4);
+  }
+
+  .animated-card2::after {
+    content: '→';
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    font-size: 2rem;
+    color: #2f2e2e;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+  }
+
+  .animated-card2:hover::after {
+    opacity: 1;
+  }
+
+  .navbar-brand {
+    margin: auto;
+    /* Center the text */
+    font-size: 20px;
+    /* Adjust size as needed */
+    font-weight: bold;
+    direction: rtl;
+    /* Ensure correct text direction for Hebrew */
+  }
+
+
+
+  .animated-card {
+    width: 90%;
+    max-height: 200px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+    transform-style: preserve-3d;
+  }
+
+  .animated-card:hover {
+    transform: rotateY(10deg) rotateX(10deg) scale(1.05);
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4);
+  }
+
+  .animated-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease-in-out;
+  }
+
+  .animated-card:hover img {
+    transform: scale(1.1);
+  }
+
+  .card-title {
+    position: relative;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .card-title h5 {
+    padding: 10px;
+    margin: 0;
+  }
+
+
+
+  .card:hover .card-title {
+    background: rgba(0, 0, 0, 0.8);
+  }
+
+
+  .order-card {
+    border: 1px solid #000;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  .order-card img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+  }
+
+  .order-card:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), 0 6px 6px rgba(0, 0, 0, 0.2);
+  }
+
+
+  /* Basic page style resets */
+  * {
+    box-sizing: border-box;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  @media (min-width: 1024px) {
+
+    /* Large screens (lg) */
+    .animated-card {
+      width: 70%;
+    }
+  }
+
+  /* Import fonts */
+  @font-face {
+    font-family: HK Grotesk;
+    src: url("https://cdn.glitch.me/605e2a51-d45f-4d87-a285-9410ad350515%2FHKGrotesk-Regular.otf?v=1603136326027") format("opentype");
+  }
+
+  @font-face {
+    font-family: HK Grotesk;
+    font-weight: bold;
+    src: url("https://cdn.glitch.me/605e2a51-d45f-4d87-a285-9410ad350515%2FHKGrotesk-Bold.otf?v=1603136323437") format("opentype");
+  }
+
+  /* Our remix on glitch button */
+  .btn--remix {
+    font-family: HK Grotesk;
+    padding: 0.75rem 1rem;
+    font-size: 1.1rem;
+    line-height: 1rem;
+    font-weight: 500;
+    height: 2.75rem;
+    align-items: center;
+    cursor: pointer;
+    background: #FFFFFF;
+    border: 1px solid #000000;
+    box-sizing: border-box;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #000;
+    white-space: nowrap;
+    margin-left: auto;
+  }
+
+  .btn--remix img {
+    margin-right: 0.5rem;
+  }
+
+  .btn--remix:hover {
+    background-color: #D0FFF1;
+  }
+
+  /* Navigation grid */
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    margin: 1rem auto 0;
+    padding: 1rem 0 0.75rem 0;
+    width: 100%;
+    flex-wrap: wrap;
+    border-top: 4px solid #fff;
+  }
+
+  .footer a:not(.btn--remix):link,
+  a:not(.btn--remix):visited {
+    font-family: HK Grotesk;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 1.1rem;
+    color: #000;
+    text-decoration: none;
+    border-style: none;
+  }
+
+  .footer a:hover {
+    background: var(--color-primary);
+  }
+
+  .footer .links {
+    padding: 0.5rem 1rem 1.5rem;
+    white-space: nowrap;
+  }
+
+  .divider {
+    padding: 0 1rem;
+  }
+
+  /******************************************************************************
+  END Glitch hello-app default styles
+  ******************************************************************************/
+
+  body {
+    font-family: HK Grotesk;
+    background-color: var(--color-bg);
+    direction: rtl;
+
+  }
+
+  /* Page structure */
+  .wrapper {
+    min-height: var(--wrapper-height);
+    /* display: grid; */
+    /* place-items: center; */
+    margin: 0 1rem;
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    justify-content: left;
+  }
+
+  p {
+    font-size: 1.25rem;
+  }
+
+  /* Title h1 style */
+  .title {
+    color: var(--color-text-header);
+    font-family: HK Grotesk;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 100px;
+    line-height: 105%;
+    margin: 2rem 0 0;
+  }
+
+  /* Very light scaling for our illustration */
+  .illo-container {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .illustration {
+    max-width: 100%;
+    max-height: 150px;
+    margin-top: 1rem;
+  }
+
+  /* Styles for our custom color form and its results */
+  .color-info {
+    margin-left: 5px;
+  }
+
+  .color-search {
+    margin-top: 3rem;
+  }
+
+  .color-form {
+    width: 90%;
+    max-width: 500px;
+    margin-left: 5px;
+  }
+
+  .color-form a:not(.btn--remix) {
+    font-weight: bold;
+    color: var(--color-text-main);
+    margin-top: 8px;
+  }
+
+  .color-form button {
+    margin-top: 8px;
+  }
+
+  .color-form button:hover {
+    cursor: pointer;
+    box-shadow: -8px 4px 20px #9BE7D8;
+  }
+
+  form {
+    margin: 0.75rem 0;
+  }
+
+  button,
+  input {
+    font-family: inherit;
+    font-size: 100%;
+    background: #FFFFFF;
+    border: 1px solid #000000;
+    box-sizing: border-box;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+  }
+
+  label {
+    color: #000000;
+    font-weight: bold;
+  }
+
+  /* Instructions */
+  .instructions {
+    margin: 1rem auto 0;
+  }
+
+  .instructions p {
+    font-size: 1rem;
+  }
+
+  h2 {
+    color: var(--color-text-header);
+  }

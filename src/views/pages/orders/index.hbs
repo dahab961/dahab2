@@ -1,0 +1,78 @@
+{{> navbar}}
+
+<div class="wrapper mt-5">
+    <div class="content" role="main">
+        <div class="mt-5 text-center">
+            <h1 class="three-d-text">הזמנות</h1>
+
+            <div class="mt-4 d-flex justify-content-center">
+                <div class="search-bar flex-column w-100 align-items-center" style="max-width: 800px;">
+                    <div id="search-form" class="form-inline w-100">
+                        <div class="input-group">
+                            <input type="text" id="searchInput" name="search" class="form-control"
+                                placeholder="חפש הזמנה לפי מספר הזמנה או מספר לקוח" value="">
+                            <button type="button" class="btn btn-primary">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Date Filter -->
+                    <form id="date-form" class="form-inline w-100 mt-3 text-center">
+                        <button type="button" class="btn btn-sm btn-light" id="dateFilterBtn">
+                            <i class="fa fa-clock"></i> סנן לפי תאריך
+                        </button>
+
+                        <div id="dateFilters" class="d-flex flex-wrap gap-3 justify-content-center w-100 mt-3"
+                            style="display: none;">
+                            <div class="d-flex flex-column">
+                                <label for="fromDate" class="small">תאריך התחלה:</label>
+                                <input type="date" id="fromDate" class="form-control" name="fromDate">
+                            </div>
+                            <div class="d-flex flex-column">
+                                <label for="toDate" class="small">תאריך סיום:</label>
+                                <input type="date" id="toDate" class="form-control" name="toDate">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary align-self-end">
+                                <i class="fa fa-search"></i> סנן
+                            </button>
+                        </div>
+                        <small id="date-error" class="text-danger d-none">נא להזין תאריך התחלה תקין</small>
+                    </form>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12 d-flex justify-content-center gap-2">
+                    <a type="button" class="btn btn-sm btn-light" href='/orders/add/'>
+                        <i class="fas fa-plus"></i>
+                    </a>
+                    <button type="button" class="btn btn-sm btn-light" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <a type="button" class="btn btn-sm btn-light" href="/products">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="text-center mt-4" id="statusFilters"></div>
+
+            <!-- Orders -->
+            <div class="container mt-4">
+                <div id="ordersContainer"></div>
+            </div>
+
+            <div class="text-center mt-4">
+                <div class="loading-dots" id="loadingSpinner">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+                <div id="errorAlert" class="alert alert-danger d-none">שגיאה בטעינת הזמנות</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="/javascript/orders.js"></script>
