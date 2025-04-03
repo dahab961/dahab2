@@ -20,130 +20,157 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
             await showCustomerList(event.target.value)
         );
 
-        const categories = [
-            { code: 'cat1', name: 'קטגוריה 1' },
-            { code: 'cat2', name: 'קטגוריה 2' },
-            { code: 'cat3', name: 'קטגוריה 3' },
-        ];
-
-        const products = [
-            { id: 'prod1', name: 'מוצר 1', imageLink: '/images/product.jpg', code: 'P1', categoryCode: 'cat1' },
-            { id: 'prod2', name: 'מוצר 2', imageLink: '/images/product.jpg', code: 'P2', categoryCode: 'cat2' },
-            { id: 'prod3', name: 'מוצר 3', imageLink: '/images/product.jpg', code: 'P3', categoryCode: 'cat1' },
-            { id: 'prod4', name: 'מוצר 4', imageLink: '/images/product.jpg', code: 'P4', categoryCode: 'cat2' },
-        ];
-
-        // Selected products (initially empty)
-
-        // Create category filter dynamically
+        let categories = [];
+        let products = [];
         const categoryFilter = document.getElementById('category-filter');
-        categories.forEach(category => {
-            const categoryButton = document.createElement('button');
-            categoryButton.classList.add('category-btn');
-            categoryButton.textContent = category.name;
-            categoryButton.dataset.category = category.code;
-            categoryButton.onclick = function (event) {
-                event.preventDefault();
-                filterProductsByCategory(category.code);
-            };
-            categoryFilter.appendChild(categoryButton);
-        });
 
-        // Filter products by category
-        function filterProductsByCategory(categoryCode) {
-            const productList = document.getElementById('product-list');
-            productList.innerHTML = ''; // Clear the product list
-
-            const filteredProducts = products.filter(product => product.categoryCode === categoryCode);
-
-            filteredProducts.forEach(product => {
-                const productDiv = document.createElement('div');
-                productDiv.classList.add('product-item');
-                productDiv.dataset.productId = product.id;
-
-                const productImage = document.createElement('img');
-                productImage.src = product.imageLink;
-                productImage.alt = product.name;
-                productImage.width = 60;
-                productImage.height = 60;
-
-                const productInfo = document.createElement('div');
-                const productName = document.createElement('h3');
-                productName.textContent = product.name;
-                const productCode = document.createElement('p');
-                productCode.textContent = product.code;
-
-                const selectButton = document.createElement('button');
-                selectButton.textContent = 'Select';
-                selectButton.onclick = function (event) {
-                    event.preventDefault();
-                    selectProduct(product);
-                };
-
-                productInfo.appendChild(productName);
-                productInfo.appendChild(productCode);
-                productInfo.appendChild(selectButton);
-                productDiv.appendChild(productImage);
-                productDiv.appendChild(productInfo);
-
-                productList.appendChild(productDiv);
-            });
-        }
-
-        // Select a product and add it to the selected list
-        function selectProduct(product) {
-            if (!selectedProducts.find(p => p.id === product.id)) {
-                selectedProducts.push({ ...product, quantity: 1 }); // Add selected product
-                updateSelectedProducts();
+        async function fetchCategories() {
+            try {
+                const data = await fetchData("/api/categories");
+                categories = data.categories ?? [];
+                categories.forEach(category => {
+                    const categoryButton = document.createElement('button');
+                    categoryButton.classList.add('category-btn', 'btn', 'btn-light');
+                    categoryButton.textContent = category.name;
+                    categoryButton.dataset.category = category.code;
+                    categoryButton.onclick = function (event) {
+                        event.preventDefault();
+                        filterProductsByCategory(category.code);
+                    };
+                    categoryFilter.appendChild(categoryButton);
+                });
+            } catch (error) {
+                showToast(ERROR_MESSAGE);
             }
         }
 
-        // Update the selected products section
-        function updateSelectedProducts() {
-            const selectedProductsDiv = document.getElementById('selected-products');
-            const selectedProductsCount = document.getElementById('selected-products-count');
-            selectedProductsCount.textContent = selectedProducts.length;
+        async function filterProductsByCategory(categoryCode) {
+            try {
+                const data = await fetchData(`/api/products/${categoryCode}`);
+                products = data.products ?? [];
+                const productList = document.getElementById('product-list');
+                productList.innerHTML = '';
+                const filteredProducts = products.filter(product => product.categoryId === categoryCode);
 
+                filteredProducts.forEach(product => {
+                    const productDiv = document.createElement('div');
+                    productDiv.classList.add('product-item', "col-12", "col-md-6", 'col-lg-4');
+                    productDiv.dataset.productId = product.id;
+
+                    const productImage = document.createElement('img');
+                    productImage.src = product.image;
+                    productImage.alt = product.name;
+                    productImage.width = 60;
+                    productImage.height = 60;
+
+                    const productInfo = document.createElement('div');
+                    const productName = document.createElement('h3');
+                    productName.textContent = product.name;
+                    const productCode = document.createElement('p');
+                    productCode.textContent = product.id;
+
+                    const selectButton = document.createElement('button');
+                    selectButton.textContent = 'Select';
+                    selectButton.onclick = function (event) {
+                        event.preventDefault();
+                        selectProduct(product);
+                    };
+                    productInfo.appendChild(productName);
+                    productInfo.appendChild(productCode);
+                    productInfo.appendChild(selectButton);
+                    productDiv.appendChild(productImage);
+                    productDiv.appendChild(productInfo);
+                    productList.appendChild(productDiv);
+                });
+            } catch (error) {
+                showToast(ERROR_MESSAGE);
+            }
+        }
+
+        function selectProduct(product) {
+            const existingProduct = selectedProducts.find(p => p.id === product.id);
+
+            if (!existingProduct) {
+                selectedProducts.push({
+                    ...product,
+                    quantity: 1,
+                    materials: []
+                });
+                updateSelectedProducts();
+            } else {
+                showToast("מוצר זה כבר נמצא ברשימה", "warning", 4000);
+            }
+        }
+
+        // Update selected products UI
+        function updateSelectedProducts() {
+            elements.selectedProductsCount.textContent = selectedProducts.length;
+
+            // Clear the selected products list
             const selectedProductsList = document.createElement('div');
+            selectedProductsList.classList.add('list-group');
+
             selectedProducts.forEach(product => {
                 const productDiv = document.createElement('div');
-                productDiv.classList.add('selected-product');
+                productDiv.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
 
-                const productName = document.createElement('h4');
+                // Product name
+                const productName = document.createElement('h5');
                 productName.textContent = product.name;
+                productName.classList.add('mb-0');
 
-                const removeButton = document.createElement('button');
-                removeButton.textContent = 'Remove';
+                // Manage materials button
+                const manageMaterialsButton = document.createElement('button');
+                manageMaterialsButton.classList.add('btn', 'btn-sm', 'btn-info');
+                manageMaterialsButton.textContent = 'ניהול חומרים';
+                manageMaterialsButton.onclick = function (event) {
+                    event.preventDefault();
+                    openMaterialModal(product.id);
+                };
+
+                // Remove button (with icon)
+                const removeButton = document.createElement('i');
+                removeButton.classList.add('fa', 'fa-trash', 'text-danger', 'cursor-pointer');
+                removeButton.style.cursor = 'pointer';
                 removeButton.onclick = function (event) {
                     event.preventDefault();
                     removeProduct(product.id);
                 };
 
+                // Quantity input
                 const quantityInput = document.createElement('input');
                 quantityInput.type = 'number';
                 quantityInput.value = product.quantity;
-                quantityInput.classList.add('product-quantity');
+                quantityInput.classList.add('form-control', 'w-25');
                 quantityInput.onchange = function () {
                     updateProductQuantity(product.id, quantityInput.value);
                 };
 
+                // Append elements to productDiv
+                const productActionsDiv = document.createElement('div');
+                productActionsDiv.classList.add('d-flex', 'align-items-center', 'gap-3');
+                productActionsDiv.appendChild(removeButton);
+                productActionsDiv.appendChild(manageMaterialsButton);
+                productActionsDiv.appendChild(quantityInput);
+
                 productDiv.appendChild(productName);
-                productDiv.appendChild(removeButton);
-                productDiv.appendChild(quantityInput);
+                productDiv.appendChild(productActionsDiv);
+
                 selectedProductsList.appendChild(productDiv);
             });
 
-            selectedProductsDiv.innerHTML = ''; // Clear the list before adding updated content
-            selectedProductsDiv.appendChild(selectedProductsList);
+            // Clear previous content and append new list
+            elements.selectedProductsDiv.innerHTML = '';
+            elements.selectedProductsDiv.appendChild(selectedProductsList);
         }
 
-        // Remove a product from the selected list
+        // Remove selected product
         function removeProduct(productId) {
             selectedProducts = selectedProducts.filter(product => product.id !== productId);
             updateSelectedProducts();
         }
 
-        // Update the quantity of a selected product
+        // Update selected product quantity
         function updateProductQuantity(productId, quantity) {
             const product = selectedProducts.find(product => product.id === productId);
             if (product) {
@@ -151,11 +178,263 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
             }
         }
 
+        // Open the modal for managing materials of a selected product
+        // Open the modal for managing materials of a selected product
+        function openMaterialModal(productId) {
+            const product = selectedProducts.find(p => p.id === productId);
+
+            const materialModalLabel = document.getElementById('materialModalLabel');
+            materialModalLabel.textContent = `ניהול חומרים עבור ${product.name}`;
+            document.getElementById("materialModalCode").textContent = productId;
+
+            const materialsListDiv = document.getElementById('product-materials-list');
+            materialsListDiv.innerHTML = '';
+
+            // Display materials
+            product.materials.forEach((material, index) => displayMaterial(materialsListDiv, material, index));
+            new bootstrap.Modal(document.getElementById('materialModal')).show();
+
+        }
+
+        function displayMaterial(materialsListDiv, material, index) {
+            const materialDiv = document.createElement('div');
+            materialDiv.classList.add('d-flex', 'justify-content-between', 'align-items-center', 'mb-2');
+
+            const materialName = document.createElement('span');
+            materialName.textContent = material.name;
+
+            const materialQuantity = document.createElement('span');
+            materialQuantity.textContent = `כמות: ${material.quantity}`;
+            materialQuantity.classList.add('badge', 'bg-secondary');
+
+            const editButton = document.createElement('button');
+            editButton.classList.add('btn', 'btn-warning', 'btn-sm', 'ms-3');
+            editButton.innerHTML = '<i class="fa fa-edit"></i> ערוך';
+            editButton.onclick = function () {
+                openEditMaterialModal(productId, index);
+            };
+
+            const removeButton = document.createElement('button');
+            removeButton.classList.add('btn', 'btn-danger', 'btn-sm');
+            removeButton.innerHTML = '<i class="fa fa-trash"></i> הסר';
+            removeButton.onclick = function () {
+                removeMaterial(productId, index);
+            };
+
+            materialDiv.appendChild(materialName);
+            materialDiv.appendChild(materialQuantity);
+            materialDiv.appendChild(editButton);
+            materialDiv.appendChild(removeButton);
+
+            materialsListDiv.appendChild(materialDiv);
+        }
+
+        // Show modal
+
+        // Add new material to a selected product
+        function addMaterial() {
+            // Get the product ID from the modal's context
+            const productId = document.getElementById('productId').value;  // Assuming you store productId in a hidden input
+            const product = selectedProducts.find(p => p.id === productId);
+
+            const materialName = document.getElementById('materialName').value;
+            const materialQuantity = parseInt(document.getElementById('materialQuantity').value);
+
+            if (materialName && materialQuantity) {
+                product.materials.push({ name: materialName, quantity: materialQuantity });
+                updateMaterialsList(productId);  // Update the material list UI
+            }
+        }
+
+        function openEditMaterialModal(productId, materialIndex) {
+            const product = selectedProducts.find(p => p.id === productId);
+            const material = product.materials[materialIndex];
+
+            document.getElementById('materialName').value = material.name;
+            document.getElementById('materialQuantity').value = material.quantity;
+
+            // Change the save button to "Update"
+            const saveBtn = document.getElementById('saveMaterialBtn');
+            saveBtn.textContent = 'Update Material';
+            saveBtn.onclick = function () {
+                updateMaterial(productId, materialIndex);
+            };
+        }
+
+        // Function to update existing material
+        function updateMaterial(productId, materialIndex) {
+            const product = selectedProducts.find(p => p.id === productId);
+            const material = product.materials[materialIndex];
+
+            material.name = document.getElementById('materialName').value;
+            material.quantity = parseInt(document.getElementById('materialQuantity').value);
+
+            updateMaterialsList(productId); // Update the material list UI
+            document.getElementById('materialForm').reset(); // Reset the form
+            document.getElementById('saveMaterialBtn').textContent = 'Save Material'; // Reset button text
+        }
+
+        // Update material list UI for a selected product
+        function updateMaterialsList(productId) {
+            const product = selectedProducts.find(p => p.id === productId);
+            const materialsListDiv = document.getElementById('product-materials-list');
+            materialsListDiv.innerHTML = '';
+
+            product.materials.forEach((material, index) => {
+                const materialDiv = document.createElement('div');
+                materialDiv.classList.add('d-flex', 'justify-content-between', 'align-items-center', 'mb-2');
+
+                const materialName = document.createElement('span');
+                materialName.textContent = material.name;
+
+                const materialQuantity = document.createElement('span');
+                materialQuantity.textContent = `כמות: ${material.quantity}`;
+                materialQuantity.classList.add('badge', 'bg-secondary');
+
+                const editButton = document.createElement('button');
+                editButton.classList.add('btn', 'btn-warning', 'btn-sm', 'ms-3');
+                editButton.innerHTML = '<i class="fa fa-edit"></i> ערוך';
+                editButton.onclick = function () {
+                    openEditMaterialModal(productId, index);
+                };
+
+                const removeButton = document.createElement('button');
+                removeButton.classList.add('btn', 'btn-danger', 'btn-sm');
+                removeButton.innerHTML = '<i class="fa fa-trash"></i> הסר';
+                removeButton.onclick = function () {
+                    removeMaterial(productId, index);
+                };
+
+                materialDiv.appendChild(materialName);
+                materialDiv.appendChild(materialQuantity);
+                materialDiv.appendChild(editButton);
+                materialDiv.appendChild(removeButton);
+
+                materialsListDiv.appendChild(materialDiv);
+            });
+        }
+
+        function createProductItem(product) {
+            const productDiv = document.createElement('div');
+            productDiv.classList.add('col-12', 'col-md-4', 'col-lg-3');
+            productDiv.id = `product-${product.id}`;
+
+            const productItemDiv = document.createElement('div');
+            productItemDiv.classList.add('product-item');
+
+            const productName = document.createElement('h5');
+            productName.textContent = product.name;
+
+            const manageButton = document.createElement('button');
+            manageButton.classList.add('btn', 'btn-outline-primary', 'btn-sm');
+            manageButton.textContent = 'ניהול חומרים';
+            manageButton.onclick = () => openMaterialModal(product.id);
+
+            productItemDiv.appendChild(productName);
+            productItemDiv.appendChild(manageButton);
+            productDiv.appendChild(productItemDiv);
+
+            return productDiv;
+        }
+
+        // Function to save the new material for the selected product
+        function saveMaterial() {
+            const productId = document.getElementById('materialModalCode').textContent; // Get product ID from modal title
+            const product = selectedProducts.find(p => p.id === productId);
+
+            const materialName = document.getElementById('materialName').value;
+            const materialQuantity = parseInt(document.getElementById('materialQuantity').value);
+
+            if (materialName && materialQuantity) {
+                product.materials.push({ name: materialName, quantity: materialQuantity });
+                updateMaterialsList(productId); // Update the material list UI
+                document.getElementById('materialForm').reset(); // Reset the form fields
+            }
+        }
+
+        // Remove material from a selected product
+        function removeMaterial(productId, materialIndex) {
+            const product = selectedProducts.find(p => p.id === productId);
+            product.materials.splice(materialIndex, 1);
+            updateMaterialsList(productId);  // Update the material list UI
+        }
+        function removeMaterial(productId, materialIndex) {
+            const product = selectedProducts.find(p => p.id === productId);
+            product.materials.splice(materialIndex, 1); // Remove material from the array
+            updateMaterialsList(productId); // Update the material list UI
+        }
+
+        // Function to open the modal for editing material
+        function openEditMaterialModal(productId, materialIndex) {
+            const product = selectedProducts.find(p => p.id === productId);
+            const material = product.materials[materialIndex];
+
+            document.getElementById('materialName').value = material.name;
+            document.getElementById('materialQuantity').value = material.quantity;
+
+            // Change the save button to "Update"
+            const saveBtn = document.getElementById('saveMaterialBtn');
+            saveBtn.textContent = 'עדכן חומר';
+            saveBtn.onclick = function () {
+                updateMaterial(productId, materialIndex);
+            };
+        }
+
+        function updateMaterial(productId, materialIndex) {
+            const product = selectedProducts.find(p => p.id === productId);
+            const material = product.materials[materialIndex];
+
+            material.name = document.getElementById('materialName').value;
+            material.quantity = parseInt(document.getElementById('materialQuantity').value);
+
+            updateMaterialsList(productId); // Update the material list UI
+            document.getElementById('materialForm').reset(); // Reset the form
+            document.getElementById('saveMaterialBtn').textContent = 'שמור חומר'; // Reset button text
+        }
+
+        // Function to update the material list in the modal
+        function updateMaterialsList(productId) {
+            const product = selectedProducts.find(p => p.id === productId);
+            const materialsListDiv = document.getElementById('product-materials-list');
+            materialsListDiv.innerHTML = '';
+
+            product.materials.forEach((material, index) => {
+                const materialDiv = document.createElement('div');
+                materialDiv.classList.add('d-flex', 'justify-content-between', 'align-items-center', 'mb-2');
+
+                const materialName = document.createElement('span');
+                materialName.textContent = material.name;
+
+                const materialQuantity = document.createElement('span');
+                materialQuantity.textContent = `כמות: ${material.quantity}`;
+                materialQuantity.classList.add('badge', 'bg-secondary');
+
+                const editButton = document.createElement('button');
+                editButton.classList.add('btn', 'btn-warning', 'btn-sm', 'ms-3');
+                editButton.innerHTML = '<i class="fa fa-edit"></i> ערוך';
+                editButton.onclick = function () {
+                    openEditMaterialModal(productId, index);
+                };
+
+                const removeButton = document.createElement('button');
+                removeButton.classList.add('btn', 'btn-danger', 'btn-sm');
+                removeButton.innerHTML = '<i class="fa fa-trash"></i> הסר';
+                removeButton.onclick = function () {
+                    removeMaterial(productId, index);
+                };
+
+                materialDiv.appendChild(materialName);
+                materialDiv.appendChild(materialQuantity);
+                materialDiv.appendChild(editButton);
+                materialDiv.appendChild(removeButton);
+
+                materialsListDiv.appendChild(materialDiv);
+            });
+        }
+
         async function showCustomerList(searchTerm = "") {
             try {
                 const data = await fetchData("/api/customers");
-                // console.log("Customers Data:", data);
-
                 const filteredData = filterCustomers(data.customers, searchTerm);
                 renderCustomers(filteredData);
             } catch (error) {
@@ -229,11 +508,16 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
         }
 
         function productItemHTML(product) {
-            return `<div class='list-group-item d-flex justify-content-between align-items-center'>
-                        ${product.name}
-                        <input type='number' class='form-control w-25' id='quantity-${product.id}' placeholder='כמות' disabled>
-                        <button class='btn btn-outline-primary btn-sm' onclick='toggleProductSelection(${JSON.stringify(product)})'>בחר</button>
-                    </div>`;
+            return `
+                <div class="col-12 col-md-4 col-lg-3 mb-3">
+                    <div class="card p-3 text-center">
+                        <h5 class="card-title">${product.name}</h5>
+                        <input type="number" class="form-control w-50 my-2" id="quantity-${product.id}" placeholder="כמות" disabled>
+                        <button class="btn btn-outline-primary btn-sm" onclick='toggleProductSelection(${JSON.stringify(product)})'>
+                            בחר
+                        </button>
+                    </div>
+                </div>`;
         }
 
         function toggleProductSelection(product) {
@@ -246,42 +530,50 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
             updateProductList();
         }
 
+        // Add products to the page dynamically
         function updateProductList() {
-            elements.selectedProductsList.innerHTML = selectedProducts
-                .map(p => `<div>${p.name} - כמות: ${document.getElementById(`quantity-${p.id}`).value || 1}</div>`)
-                .join("");
+            const productListDiv = document.getElementById('product-list');
+            productListDiv.innerHTML = ''; // Clear the list
+            selectedProducts.forEach(product => {
+                productListDiv.appendChild(createProductItem(product));
+            });
         }
-        function showToast(message) {
-            // Create a new toast element
+
+        function showToast(message, type = "danger", duration = 5000) {
+            const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+
             const toastElement = document.createElement('div');
-            toastElement.classList.add('toast');
-            toastElement.classList.add('align-items-center');
-            toastElement.classList.add('text-bg-danger');
-            toastElement.classList.add('border-0');
+            toastElement.classList.add('toast', 'align-items-center', `text-bg-${type}`, 'border-0');
             toastElement.setAttribute('role', 'alert');
             toastElement.setAttribute('aria-live', 'assertive');
             toastElement.setAttribute('aria-atomic', 'true');
+
             toastElement.innerHTML = `
-              <div class="d-flex">
-                <div class="toast-body">
-                  ${message}
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                 </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-              </div>
             `;
 
-            // Append the toast to the container
-            document.getElementById('toastContainer').appendChild(toastElement);
-
-            // Initialize the toast and show it
+            toastContainer.appendChild(toastElement);
             const toast = new bootstrap.Toast(toastElement);
             toast.show();
 
-            // Remove the toast after it has disappeared (5 seconds)
             setTimeout(() => {
                 toastElement.remove();
-            }, 5000);
+            }, duration);
         }
+
+        function createToastContainer() {
+            const container = document.createElement('div');
+            container.id = 'toastContainer';
+            container.classList.add('toast-container', 'position-fixed', 'top-0', 'end-0', 'p-3');
+            document.body.appendChild(container);
+            return container;
+        }
+
         function moveToStep2() {
             if (!newOrder.customerNO) return showToast(ERROR_MESSAGE);
             orderCode = generateOrderId(selectedCustomer.firstName);
@@ -289,8 +581,9 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
             switchStep(elements.firstStepForm, elements.secondStepForm);
         }
 
-        function moveToStep3() {
+        async function moveToStep3() {
             if (!elements.orderIdInput.value.trim()) return showToast(ERROR_MESSAGE);
+            await fetchCategories();
             switchStep(elements.secondStepForm, elements.thirdStepForm);
             elements.nextToStep4.disabled = false;
         }
@@ -339,6 +632,7 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
             }
         }
         document.getElementById("copy-btn").addEventListener("click", copyOrderNumber);
+        document.getElementById("saveMaterialBtn").addEventListener("click", saveMaterial);
         function copyOrderNumber() {
             const orderNumber = elements.orderNumber.innerText;
             navigator.clipboard.writeText(orderNumber).then(() => {
@@ -418,7 +712,9 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
                 errorAlert: document.getElementById("error"),
                 statusSelect: document.getElementById("status"),
                 notes: document.getElementById("notes"),
-                orderDetails: document.getElementById("orderDetails")
+                orderDetails: document.getElementById("orderDetails"),
+                selectedProductsDiv: document.getElementById('selected-products'),
+                selectedProductsCount: document.getElementById('selected-products-count')
             };
         }
 

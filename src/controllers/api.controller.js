@@ -57,6 +57,23 @@ const products = async (req, res) => {
 };
 
 
+const categories = async (req, res) => {
+    let categories = [];
+    let status = 200;
+    let error = null;
+
+    try {
+        categories = (await GoogleSheetsApi.GoogleSheetsApi.getCategories()) || [];
+    } catch (err) {
+        error = err.message || "An unexpected error occurred";
+        status = 500;
+        console.error("Error fetching categories:", err);
+    }
+
+    return res.status(status).send(error ? { error } : { categories });
+};
+
+
 const allProductsAndMaterials = async (req, res) => {
     let products = [];
     let materials = [];
@@ -71,11 +88,11 @@ const allProductsAndMaterials = async (req, res) => {
         console.error("Error fetching products:", err);
     }
 
-    return res.status(status).send(error ? { error } : { products,materials });
+    return res.status(status).send(error ? { error } : { products, materials });
 };
 
 
-const addOrder =  (req, reply) => {
+const addOrder = (req, reply) => {
     try {
         const { error, value } = orderSchema.validate(req.body.order, { abortEarly: false });
 
@@ -88,7 +105,7 @@ const addOrder =  (req, reply) => {
                 }))
             });
         }
-         GoogleSheetsApi.GoogleSheetsApi.addOrder(req.body.order);
+        GoogleSheetsApi.GoogleSheetsApi.addOrder(req.body.order);
         return reply.status(200).send({ message: 'הזמנה נוספה בהצלחה' });
     } catch (e) {
         return reply.status(500).send({
@@ -152,5 +169,6 @@ module.exports = {
     materials,
     addOrder,
     customers,
+    categories,
     allProductsAndMaterials
 };

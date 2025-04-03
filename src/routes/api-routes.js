@@ -4,6 +4,9 @@ async function apiRoutes(app) {
     app.get("/api/products/:categoryId", async (req, reply) =>
         await apiController.products(req, reply));
 
+    app.get("/api/categories", async (req, reply) =>
+        await apiController.categories(req, reply));
+
     app.get("/api/products-materials", async (req, reply) =>
         await apiController.allProductsAndMaterials(req, reply));
 
