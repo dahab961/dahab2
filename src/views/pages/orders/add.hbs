@@ -4,26 +4,26 @@
     <div class="content" role="main">
         <div class="mt-5 col-12 col-md-6 mx-auto">
             <h1 class="three-d-text text-center">הוספת הזמנה חדשה</h1>
-            <form id="orderForm" novalidate>
+
+            <form id="orderForm">
                 <div id="first-step-form" class="container mt-3">
                     <h4 class="text-center mb-4">שלב 1: בחירת לקוח</h4>
 
                     <div class="mb-3">
-                        <label for="customerName" class="form-label fw-bold">שם לקוח</label>
+                        <label for="searchCustomer" class="form-label fw-bold">שם לקוח</label>
                         <div class="position-relative">
-                            <input type="text" class="form-control" id="searchCustomer" placeholder="חפש לקוח...">
+                            <input type="text" class="form-control" id="searchCustomer" placeholder="חפש לקוח..."
+                                autocomplete="off">
                             <div id="customerList" class="list-group position-absolute w-100 mt-1 shadow-sm d-none"
                                 style="z-index: 1000; max-height: 250px; overflow-y: auto;">
                             </div>
                         </div>
                     </div>
 
-
                     <div class="d-flex flex-wrap gap-2 justify-content-between mt-3">
                         <button type="button" class="btn btn-secondary prev-step">הקודם</button>
                         <button type="button" class="btn btn-primary next-step" id="nextToStep2" disabled>הבא</button>
                     </div>
-
                 </div>
 
                 <div id="second-step-form" class="d-none">
@@ -47,14 +47,27 @@
                         <button type="button" class="btn btn-primary next-step" id="nextToStep3">הבא</button>
                     </div>
                 </div>
-
+                <!-- Step 3 - Product Selection -->
                 <div id="third-step-form" class="d-none">
                     <h4 class="text-center">שלב 3: בחירת מוצרים</h4>
-                    <button type="button" class="btn btn-outline-secondary w-100" data-bs-toggle="modal"
-                        data-bs-target="#productModal">
-                        בחר מוצרים
-                    </button>
+                    <h3>בחר מוצרים</h3>
+                    <div id="products-selector">
+                        <!-- Title -->
+                        <h2>בחר מוצרים</h2>
 
+                        <!-- Category Filter -->
+                        <div id="category-filter"></div>
+
+                        <!-- Product List -->
+                        <div id="product-list"></div>
+
+                        <!-- Selected Products -->
+                        <h3>מוצרים נבחרים: <span id="selected-products-count">0</span></h3>
+                        <div id="selected-products">
+                        </div>
+                    </div>
+
+                    <!-- Order Details & Notes -->
                     <div class="mt-3">
                         <label for="orderDetails" class="form-label">פירוט הזמנה</label>
                         <textarea class="form-control" id="orderDetails" name="orderDetails" rows="3"></textarea>
@@ -64,7 +77,9 @@
                         <label for="notes" class="form-label">הערות</label>
                         <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
                     </div>
-                    <p id="error" class="d-none"></p>
+                    <div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+                    </div>
+                    <!-- Submit Button -->
                     <div class="d-flex flex-wrap gap-2 justify-content-between mt-3">
                         <button type="button" class="btn btn-secondary prev-step" id="prev-step4">הקודם</button>
                         <button type="submit" class="btn btn-primary next-step" id="submit-btn" disabled>הוספה</button>
@@ -75,39 +90,167 @@
                     <span class="dot"></span>
                     <span class="dot"></span>
                 </div>
+
             </form>
-        </div>
 
-    </div>
-</div>
+            <div class="container d-flex justify-content-center align-items-center d-none" id="success-step">
+                <div class="card success-card text-center">
+                    <div class="success-circle">
+                        <i class="success-i checkmark">✓</i>
+                    </div>
+                    <h1>הזמנה נוספה בהצלחה</h1>
+                    <div class="mb-3">
+                        <strong>מספר הזמנה:</strong>
+                        <span id="order-number">123456</span>
+                        <button class="copy-btn" id="copy-btn">
+                            <i class="fa fa-copy"></i>
+                        </button>
+                        <span class="tooltip">מועתק!</span>
+                    </div>
+                    <div class="d-flex flex-column gap-3 mt-3 button-container">
+                        <a role="button" href="/orders" class="kit-button btn btn-light">
+                            <i class="fa fa-arrow-left"></i> חזרה לדף ההזמנות
+                        </a>
+                        <a role="button" href="/orders/add/" class="kit-button btn btn-light">
+                            <i class="fa fa-plus"></i> הוספת הזמנה חדשה
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-<!-- Product Selection Modal -->
-<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="productModalLabel">בחר מוצרים</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="productList" class="list-group"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
-    <!-- Toast -->
-    <div id="toastMessage" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive"
-        aria-atomic="true">
-        <div class="d-flex">
-            <div class="toast-body">
-                הזמנה נשלחה בהצלחה!
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                aria-label="Close"></button>
         </div>
     </div>
 </div>
+<style>
+    .copy-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        margin-left: 10px;
+        font-size: 18px;
+        color: #007bff;
+        transition: color 0.3s;
+        position: relative;
+    }
 
+        {
+            {
+            !-- .copy-btn:hover {
+                color: #0056b3;
+            }
+
+            --
+        }
+    }
+
+    .tooltip {
+        visibility: hidden;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 5px;
+        padding: 5px;
+        font-size: 12px;
+        position: absolute;
+        top: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .copy-btn.copied+.tooltip {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    h1 {
+        color: #88B04B;
+        font-family: "Nunito Sans", "Helvetica Neue", sans-serif;
+        margin-bottom: 10px;
+        font-size: clamp(24px, 5vw, 32px);
+    }
+
+    p {
+        color: #404F5E;
+        font-family: "Nunito Sans", "Helvetica Neue", sans-serif;
+        font-size: clamp(16px, 3vw, 20px);
+        margin: 0;
+    }
+
+
+    .button-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 20px;
+    }
+
+    /* Kit UI Buttons */
+    .kit-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        text-decoration: none;
+        color: white;
+        transition: all 0.3s ease-in-out;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .kit-button:active {
+        transform: scale(0.98);
+    }
+
+    .success-circle {
+        border-radius: 50%;
+        height: 150px;
+        width: 150px;
+        background: #F8FAF5;
+        margin: 0 auto 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .success-i {
+        color: #9ABC66;
+        font-size: clamp(60px, 10vw, 100px);
+        font-weight: bold;
+    }
+
+    .success-card {
+        background: white;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 500px;
+        min-width: 200px;
+        text-align: center;
+    }
+
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .success-card {
+        animation: fadeInUp 0.6s ease-in-out;
+    }
+</style>
 <script type="module" src="/javascript/add-order.js"></script>

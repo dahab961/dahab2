@@ -2,7 +2,7 @@ const { google } = require("googleapis");
 const Customer = require("../models/customer.js");
 const dotenv = require("dotenv");
 const Joi = require('joi');
-const { DEFAULT_PRODUCT_IMG, UNDEFINED_ENV_VARIABLES, SHEET_NAMES } = require('../common/constants.js');
+const { DEFAULT_PRODUCT_IMG, STATUSES, SPREADSHEET_GOOGLE_AUTH_SCOPE, UNDEFINED_ENV_VARIABLES, SHEET_NAMES } = require('../common/constants.js');
 
 const orderSchema = Joi.object({
   orderNumber: Joi.string().required().messages({
@@ -17,10 +17,10 @@ const orderSchema = Joi.object({
     'string.isoDate': 'תאריך הזמנה חייב להיות בפורמט ISO 8601'
   }),
   status: Joi.string()
-    .valid('חדשה', 'בהכנה', 'הושלמה')
+    .valid(...STATUSES)
     .optional()
     .messages({
-      'any.only': 'הסטטוס חייב להיות אחד מהערכים: pending, completed, shipped, cancelled'
+      "any.only": `הסטטוס חייב להיות אחד מהערכים: ${STATUSES.join(", ")}`,
     }),
   image: Joi.string().uri().optional().allow(null).messages({
     'string.uri': 'קישור התמונה חייב להיות כתובת URL תקפה'
@@ -45,7 +45,7 @@ const auth = new google.auth.GoogleAuth({
     private_key: GOOGLE_CONFIG.private_key.replace(/\\n/g, "\n"),
     client_email: GOOGLE_CONFIG.client_email,
   },
-  scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+  scopes: [SPREADSHEET_GOOGLE_AUTH_SCOPE],
 });
 
 const sheets = google.sheets({ version: "v4", auth });

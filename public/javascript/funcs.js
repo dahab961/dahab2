@@ -1,4 +1,5 @@
-const HEADERS = { "Content-Type": "application/json" };
+const HEADERS = { "Content-Type": "application/json" },
+    ERROR_MESSAGE = "אופס משהו השתבש";
 
 const status = (response) => {
     if (response.status === 404) return Promise.reject(new Error("404 Not Found"));
@@ -80,4 +81,4 @@ function serverErrorHandler(error, deleteRequest = false) {
     getMsgWarning(errorMessage, "Error");
 }
 
-export { HEADERS, isHiddenElement, formatDate, status, json, serverErrorHandler, hide, show, getMsgWarning };
+export { HEADERS, ERROR_MESSAGE, isHiddenElement, formatDate, status, json, serverErrorHandler, hide, show, getMsgWarning };

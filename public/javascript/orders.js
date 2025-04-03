@@ -1,7 +1,7 @@
 'use strict';
 
 import { status, json, show, hide, formatDate, HEADERS } from "./funcs.js";
-const ORDERS_DEFAULT_IMG = '/images/order.webp';
+const ORDERS_DEFAULT_IMG = '/images/logo.png';
 
 (function () {
     document.addEventListener('DOMContentLoaded', () => {
@@ -83,11 +83,11 @@ const ORDERS_DEFAULT_IMG = '/images/order.webp';
 
             orderList.forEach(order => {
                 html += `
-            <div class="col-6 col-md-4 col-lg-3 mb-4">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
                 <a class="card order-card h-100 text-decoration-none" href='/orders/${order.orderNumber}'>
                     <img src="${ORDERS_DEFAULT_IMG}" class="img-fluid" alt="Order Image">
                     <div class="order-body text-center">
-                        <h5 class="order-title">${order.orderNumber || 'Unknown Order No'}</h5>
+                        <h5 class="order-title">${order.orderNumber || 'מספר הזמנה לא תקין'}</h5>
                         <p class="order-info"><i class="fa fa-user"></i> לקוח: ${order.customerNO || 'Unknown Customer'}</p>
                         <p class="order-info"><i class="fa fa-clock"></i> ${formatDate(order.orderDate) || 'Unknown Date'}</p>
                         <span class="badge bg-${getStatusColor(order.status)}">${order.status}</span>
@@ -174,7 +174,7 @@ const ORDERS_DEFAULT_IMG = '/images/order.webp';
         });
         function getStatusColor(status) {
             const statusColors = {
-                "חדשה": "secondary",
+                "חדשה": "success",
                 "בהכנה": "warning",
                 "בייצור": "info",
             };

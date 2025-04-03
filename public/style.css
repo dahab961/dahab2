@@ -19,11 +19,16 @@
   }
 
   .three-d-text {
-    font-family: 'HK Grotesk', sans-serif;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    font-size: 3rem;
     color: var(--color-text-header);
     text-align: center;
     margin: 2rem 0;
-  }
+    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+
 
   .cards-wrapper {
     display: flex;
@@ -83,20 +88,24 @@
 
   .card .card-img {
     width: 100%;
-    height: 200px; /* Fixed height for grid items */
+    height: 200px;
+    /* Fixed height for grid items */
     object-fit: cover;
     border-radius: 10px;
     transition: transform 0.3s ease-in-out;
 
     @media (max-width: 768px) {
       width: 100%;
-      height: 150px; /* Adjusted height for smaller screens */
+      height: 150px;
+      /* Adjusted height for smaller screens */
       margin: 0 auto;
     }
   }
+
   .card:hover card-img {
     transform: scale(1.05);
   }
+
   .order-card:hover {
     transform: translateY(-5px);
     box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.15);

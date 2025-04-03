@@ -6,8 +6,8 @@ const { INVALID_CATEGORY_ID, MISSING_CATEGORY_ID, INVALID_ORDER_ID } = require("
 const home = (request, seo, reply) => {
     const cards = [
         { link: "/materials", img: "/images/materials.webp", title: "חומרי גלם" },
-        { link: "/products", img: "/images/product.webp", title: "מוצרים" },
-        { link: "/orders", img: "/images/image.webp", title: "הזמנות" },
+        { link: "/products", img: "/images/categories.jpg", title: "מוצרים" },
+        { link: "/orders", img: "/images/orders.png", title: "הזמנות" },
         { link: "/customers", img: "/images/customers.png", title: "לקוחות" }
     ];
 
