@@ -1,7 +1,7 @@
 'use strict';
 
 import { status, json, show, hide, formatDate, HEADERS } from "./funcs.js";
-const ORDERS_DEFAULT_IMG = '/images/logo.png';
+import { STATUSES, ORDERS_DEFAULT_IMG } from "./constants.js";
 
 (function () {
     document.addEventListener('DOMContentLoaded', () => {
@@ -20,15 +20,16 @@ const ORDERS_DEFAULT_IMG = '/images/logo.png';
         const fromDateInput = document.getElementById("fromDate");
         const toDateInput = document.getElementById("toDate");
         const dateError = document.getElementById("date-error");
+
+        createStatusFilters();
+
         // Function to display multiple images locally
         function displayImagesLocally(event) {
             const files = event.target.files;
             const orderImgContainer = document.getElementById("order-img");
 
-            // Clear the existing images in the container
             orderImgContainer.innerHTML = '';
 
-            // Loop through selected files and create image elements
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
 
@@ -50,11 +51,9 @@ const ORDERS_DEFAULT_IMG = '/images/logo.png';
 
         async function fetchOrders() {
             try {
+                [errorAlert, dateError, dateForm, statusFilters].forEach(hide);
                 show(loadingSpinner);
-                hide(errorAlert);
-                hide(ordersContainer);
-                hide(dateError);
-
+                ordersContainer.innerHTML = '';
                 const response = await fetch(`/api/orders`, { headers: HEADERS });
                 const data = await response.json();
 
@@ -62,14 +61,13 @@ const ORDERS_DEFAULT_IMG = '/images/logo.png';
 
                 orders = data.orders;
                 filteredOrders = [...orders];
-                updateStatusFilters();
                 applyFilters();
             } catch (error) {
                 console.error("Error fetching orders:", error);
                 show(errorAlert);
             } finally {
                 hide(loadingSpinner);
-                show(ordersContainer);
+                [dateForm, statusFilters].forEach(show);
             }
         }
 
@@ -100,13 +98,11 @@ const ORDERS_DEFAULT_IMG = '/images/logo.png';
             ordersContainer.innerHTML = html;
         }
 
-        function updateStatusFilters() {
-            const uniqueStatuses = [...new Set(orders.map(order => order.status))];
-
-            statusFilters.innerHTML = uniqueStatuses.map(status => `
-                <span class="badge bg-${getStatusColor(status)} m-1 status-filter" data-status="${status}">
+        function createStatusFilters() {
+            statusFilters.innerHTML = STATUSES.map(status => `
+                <button class="btn btn-light badge bg-${getStatusColor(status)} m-1 status-filter" data-status="${status}">
                     ${status}
-                </span>
+                </button>
                 `).join("");
 
             document.querySelectorAll(".status-filter").forEach(el => {

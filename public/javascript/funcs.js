@@ -1,6 +1,41 @@
 const HEADERS = { "Content-Type": "application/json" },
     ERROR_MESSAGE = "אופס משהו השתבש";
 
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.classList.add('toast-container', 'position-fixed', 'top-0', 'end-0', 'p-3');
+    document.body.appendChild(container);
+    return container;
+}
+function showToast(message, toastContainer) {
+    const toastElement = document.createElement('div');
+    toastElement.classList.add('toast');
+    toastElement.classList.add('align-items-center');
+    toastElement.classList.add('text-bg-danger');
+    toastElement.classList.add('border-0');
+    toastElement.setAttribute('role', 'alert');
+    toastElement.setAttribute('aria-live', 'assertive');
+    toastElement.setAttribute('aria-atomic', 'true');
+    toastElement.innerHTML = `
+          <div class="d-flex">
+            <div class="toast-body">
+              ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        `;
+
+    toastContainer.appendChild(toastElement);
+
+    const toast = new bootstrap.Toast(toastElement);
+    toast.show();
+
+    setTimeout(() => {
+        toastElement.remove();
+    }, 5000);
+}
+
 const status = (response) => {
     if (response.status === 404) return Promise.reject(new Error("404 Not Found"));
     if (response.status >= 200 && response.status < 300) {
@@ -81,4 +116,4 @@ function serverErrorHandler(error, deleteRequest = false) {
     getMsgWarning(errorMessage, "Error");
 }
 
-export { HEADERS, ERROR_MESSAGE, isHiddenElement, formatDate, status, json, serverErrorHandler, hide, show, getMsgWarning };
+export { HEADERS, ERROR_MESSAGE, createToastContainer, showToast, isHiddenElement, formatDate, status, json, serverErrorHandler, hide, show, getMsgWarning };

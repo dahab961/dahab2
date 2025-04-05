@@ -1,4 +1,4 @@
-import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./funcs.js";
+import { status, json, show, hide, HEADERS, createToastContainer, showToast, formatDate, ERROR_MESSAGE } from "./funcs.js";
 
 (function () {
     document.addEventListener("DOMContentLoaded", function () {
@@ -8,13 +8,16 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
         let selectedProducts = [];
         let orderCode = '';
 
+        searchCustomer.focus();
+        elements.copyBtn.addEventListener("click", copyOrderNumber);
+        document.getElementById("saveMaterialBtn").addEventListener("click", saveMaterial);
+        document.getElementById("prev-to-step-1").addEventListener("click", () => switchStep(elements.secondStepForm, elements.firstStepForm));
+        document.getElementById("prev-to-step-2").addEventListener("click", () => switchStep(elements.thirdStepForm, elements.secondStepForm));
         elements.statusSelect.addEventListener("change", () => newOrder.status = elements.statusSelect.value);
         elements.searchCustomer.addEventListener("focus", showCustomerList);
         elements.nextToStep2.addEventListener("click", moveToStep2);
         elements.nextToStep3.addEventListener("click", moveToStep3);
         elements.nextToStep4.addEventListener("click", finalizeOrder);
-        elements.prevStep2.addEventListener("click", () => switchStep(elements.firstStepForm, elements.secondStepForm));
-        elements.prevStep4.addEventListener("click", () => switchStep(elements.secondStepForm, elements.thirdStepForm));
         elements.orderForm.addEventListener("submit", submitOrder);
         elements.searchCustomer.addEventListener("input", async (event) =>
             await showCustomerList(event.target.value)
@@ -26,6 +29,8 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
 
         async function fetchCategories() {
             try {
+                categoryFilter.innerHTML = elements.loading.innerHTML;
+                categoryFilter.classList.remove('d-none');
                 const data = await fetchData("/api/categories");
                 categories = data.categories ?? [];
                 categories.forEach(category => {
@@ -40,7 +45,7 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
                     categoryFilter.appendChild(categoryButton);
                 });
             } catch (error) {
-                showToast(ERROR_MESSAGE);
+                showToast(ERROR_MESSAGE, elements.toastContainer);
             }
         }
 
@@ -102,11 +107,9 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
             }
         }
 
-        // Update selected products UI
         function updateSelectedProducts() {
             elements.selectedProductsCount.textContent = selectedProducts.length;
 
-            // Clear the selected products list
             const selectedProductsList = document.createElement('div');
             selectedProductsList.classList.add('list-group');
 
@@ -114,21 +117,18 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
                 const productDiv = document.createElement('div');
                 productDiv.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
 
-                // Product name
                 const productName = document.createElement('h5');
                 productName.textContent = product.name;
                 productName.classList.add('mb-0');
 
-                // Manage materials button
                 const manageMaterialsButton = document.createElement('button');
                 manageMaterialsButton.classList.add('btn', 'btn-sm', 'btn-info');
                 manageMaterialsButton.textContent = 'ניהול חומרים';
-                manageMaterialsButton.onclick = function (event) {
+                manageMaterialsButton.onclick = async function (event) {
                     event.preventDefault();
-                    openMaterialModal(product.id);
+                    await openMaterialModal(product.id);
                 };
 
-                // Remove button (with icon)
                 const removeButton = document.createElement('i');
                 removeButton.classList.add('fa', 'fa-trash', 'text-danger', 'cursor-pointer');
                 removeButton.style.cursor = 'pointer';
@@ -137,7 +137,6 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
                     removeProduct(product.id);
                 };
 
-                // Quantity input
                 const quantityInput = document.createElement('input');
                 quantityInput.type = 'number';
                 quantityInput.value = product.quantity;
@@ -146,7 +145,6 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
                     updateProductQuantity(product.id, quantityInput.value);
                 };
 
-                // Append elements to productDiv
                 const productActionsDiv = document.createElement('div');
                 productActionsDiv.classList.add('d-flex', 'align-items-center', 'gap-3');
                 productActionsDiv.appendChild(removeButton);
@@ -159,18 +157,16 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
                 selectedProductsList.appendChild(productDiv);
             });
 
-            // Clear previous content and append new list
             elements.selectedProductsDiv.innerHTML = '';
             elements.selectedProductsDiv.appendChild(selectedProductsList);
         }
 
-        // Remove selected product
+
         function removeProduct(productId) {
             selectedProducts = selectedProducts.filter(product => product.id !== productId);
             updateSelectedProducts();
         }
 
-        // Update selected product quantity
         function updateProductQuantity(productId, quantity) {
             const product = selectedProducts.find(product => product.id === productId);
             if (product) {
@@ -178,22 +174,77 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
             }
         }
 
-        // Open the modal for managing materials of a selected product
-        // Open the modal for managing materials of a selected product
-        function openMaterialModal(productId) {
+        async function openMaterialModal(productId) {
             const product = selectedProducts.find(p => p.id === productId);
 
             const materialModalLabel = document.getElementById('materialModalLabel');
             materialModalLabel.textContent = `ניהול חומרים עבור ${product.name}`;
             document.getElementById("materialModalCode").textContent = productId;
 
+            try {
+                const materialListDiv = document.getElementById('material-list');
+                materialListDiv.innerHTML = '';
+                await fetchData("/api/materials").then(data => {
+                    data.materials.forEach(material => {
+                        const materialDiv = document.createElement('div');
+                        materialDiv.classList.add('col-12', 'col-md-4', 'col-lg-3', 'mb-3');
+
+                        const materialImage = document.createElement('img');
+                        materialImage.src = material.imageLink;
+                        materialImage.alt = material.name;
+                        materialImage.width = 80;
+                        materialImage.height = 80;
+                        materialImage.classList.add('img-fluid', 'rounded');
+
+                        const materialName = document.createElement('h5');
+                        materialName.textContent = material.name;
+                        materialName.classList.add('text-center', 'mt-2');
+
+                        const selectButton = document.createElement('button');
+                        selectButton.textContent = 'בחר';
+                        selectButton.classList.add('btn', 'btn-outline-primary', 'w-100');
+                        selectButton.onclick = function () {
+                            selectMaterial(productId, material);
+                        };
+
+                        const materialCard = document.createElement('div');
+                        materialCard.classList.add('card', 'p-3', 'border', 'shadow-sm');
+                        materialCard.appendChild(materialImage);
+                        materialCard.appendChild(materialName);
+                        materialCard.appendChild(selectButton);
+
+                        materialDiv.appendChild(materialCard);
+                        materialListDiv.appendChild(materialDiv);
+                    });
+                });
+            } catch (err) {
+                console.error(err);
+            }
+
             const materialsListDiv = document.getElementById('product-materials-list');
             materialsListDiv.innerHTML = '';
 
-            // Display materials
             product.materials.forEach((material, index) => displayMaterial(materialsListDiv, material, index));
             new bootstrap.Modal(document.getElementById('materialModal')).show();
+        }
 
+
+        function selectMaterial(productId, material) {
+            const product = selectedProducts.find(p => p.id === productId);
+
+            if (!product) return;
+
+            if (!product.materials) {
+                product.materials = [];
+            }
+
+            if (!product.materials.find(m => m.id === material.id)) {
+                product.materials.push(material);
+            } else {
+                alert("חומר זה כבר נמצא");
+            }
+
+            updateSelectedProducts();
         }
 
         function displayMaterial(materialsListDiv, material, index) {
@@ -229,20 +280,15 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
             materialsListDiv.appendChild(materialDiv);
         }
 
-        // Show modal
-
-        // Add new material to a selected product
         function addMaterial() {
-            // Get the product ID from the modal's context
-            const productId = document.getElementById('productId').value;  // Assuming you store productId in a hidden input
+            const productId = document.getElementById('productId').value;
             const product = selectedProducts.find(p => p.id === productId);
-
             const materialName = document.getElementById('materialName').value;
             const materialQuantity = parseInt(document.getElementById('materialQuantity').value);
 
             if (materialName && materialQuantity) {
                 product.materials.push({ name: materialName, quantity: materialQuantity });
-                updateMaterialsList(productId);  // Update the material list UI
+                updateMaterialsList(productId);
             }
         }
 
@@ -253,7 +299,6 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
             document.getElementById('materialName').value = material.name;
             document.getElementById('materialQuantity').value = material.quantity;
 
-            // Change the save button to "Update"
             const saveBtn = document.getElementById('saveMaterialBtn');
             saveBtn.textContent = 'Update Material';
             saveBtn.onclick = function () {
@@ -261,7 +306,6 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
             };
         }
 
-        // Function to update existing material
         function updateMaterial(productId, materialIndex) {
             const product = selectedProducts.find(p => p.id === productId);
             const material = product.materials[materialIndex];
@@ -269,12 +313,11 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
             material.name = document.getElementById('materialName').value;
             material.quantity = parseInt(document.getElementById('materialQuantity').value);
 
-            updateMaterialsList(productId); // Update the material list UI
-            document.getElementById('materialForm').reset(); // Reset the form
-            document.getElementById('saveMaterialBtn').textContent = 'Save Material'; // Reset button text
+            updateMaterialsList(productId);
+            document.getElementById('materialForm').reset();
+            document.getElementById('saveMaterialBtn').textContent = 'Save Material';
         }
 
-        // Update material list UI for a selected product
         function updateMaterialsList(productId) {
             const product = selectedProducts.find(p => p.id === productId);
             const materialsListDiv = document.getElementById('product-materials-list');
@@ -314,7 +357,7 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
             });
         }
 
-        function createProductItem(product) {
+        async function createProductItem(product) {
             const productDiv = document.createElement('div');
             productDiv.classList.add('col-12', 'col-md-4', 'col-lg-3');
             productDiv.id = `product-${product.id}`;
@@ -328,7 +371,7 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
             const manageButton = document.createElement('button');
             manageButton.classList.add('btn', 'btn-outline-primary', 'btn-sm');
             manageButton.textContent = 'ניהול חומרים';
-            manageButton.onclick = () => openMaterialModal(product.id);
+            manageButton.onclick = async () => await openMaterialModal(product.id);
 
             productItemDiv.appendChild(productName);
             productItemDiv.appendChild(manageButton);
@@ -337,7 +380,6 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
             return productDiv;
         }
 
-        // Function to save the new material for the selected product
         function saveMaterial() {
             const productId = document.getElementById('materialModalCode').textContent; // Get product ID from modal title
             const product = selectedProducts.find(p => p.id === productId);
@@ -347,24 +389,22 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
 
             if (materialName && materialQuantity) {
                 product.materials.push({ name: materialName, quantity: materialQuantity });
-                updateMaterialsList(productId); // Update the material list UI
-                document.getElementById('materialForm').reset(); // Reset the form fields
+                updateMaterialsList(productId);
+                document.getElementById('materialForm').reset();
             }
         }
 
-        // Remove material from a selected product
         function removeMaterial(productId, materialIndex) {
             const product = selectedProducts.find(p => p.id === productId);
             product.materials.splice(materialIndex, 1);
-            updateMaterialsList(productId);  // Update the material list UI
+            updateMaterialsList(productId);
         }
         function removeMaterial(productId, materialIndex) {
             const product = selectedProducts.find(p => p.id === productId);
-            product.materials.splice(materialIndex, 1); // Remove material from the array
-            updateMaterialsList(productId); // Update the material list UI
+            product.materials.splice(materialIndex, 1);
+            updateMaterialsList(productId);
         }
 
-        // Function to open the modal for editing material
         function openEditMaterialModal(productId, materialIndex) {
             const product = selectedProducts.find(p => p.id === productId);
             const material = product.materials[materialIndex];
@@ -372,7 +412,6 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
             document.getElementById('materialName').value = material.name;
             document.getElementById('materialQuantity').value = material.quantity;
 
-            // Change the save button to "Update"
             const saveBtn = document.getElementById('saveMaterialBtn');
             saveBtn.textContent = 'עדכן חומר';
             saveBtn.onclick = function () {
@@ -387,12 +426,11 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
             material.name = document.getElementById('materialName').value;
             material.quantity = parseInt(document.getElementById('materialQuantity').value);
 
-            updateMaterialsList(productId); // Update the material list UI
-            document.getElementById('materialForm').reset(); // Reset the form
-            document.getElementById('saveMaterialBtn').textContent = 'שמור חומר'; // Reset button text
+            updateMaterialsList(productId);
+            document.getElementById('materialForm').reset();
+            document.getElementById('saveMaterialBtn').textContent = 'שמור חומר';
         }
 
-        // Function to update the material list in the modal
         function updateMaterialsList(productId) {
             const product = selectedProducts.find(p => p.id === productId);
             const materialsListDiv = document.getElementById('product-materials-list');
@@ -480,63 +518,12 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
             });
         }
 
-        function customerItemHTML(customer) {
-            return `<button class='list-group-item list-group-item-action' onclick='selectCustomer(${JSON.stringify(customer)})'>
-                        ${customer.firstName} ${customer.lastName} - ${customer.customerNO}
-                    </button>`;
-        }
-
         function selectCustomer(customer) {
             selectedCustomer = customer;
             newOrder.customerNO = customer.customerNO;
             elements.searchCustomer.value = `${customer.firstName} ${customer.lastName} - ${customer.customerNO}`;
             hide(elements.customerList);
             elements.nextToStep2.disabled = false;
-        }
-
-        async function loadProducts() {
-            try {
-                const data = await fetchData("/api/products-materials");
-                renderProducts(data.products);
-            } catch (error) {
-                console.error("Error loading products:", error);
-            }
-        }
-
-        function renderProducts(products) {
-            elements.productList.innerHTML = products.map(productItemHTML).join("");
-        }
-
-        function productItemHTML(product) {
-            return `
-                <div class="col-12 col-md-4 col-lg-3 mb-3">
-                    <div class="card p-3 text-center">
-                        <h5 class="card-title">${product.name}</h5>
-                        <input type="number" class="form-control w-50 my-2" id="quantity-${product.id}" placeholder="כמות" disabled>
-                        <button class="btn btn-outline-primary btn-sm" onclick='toggleProductSelection(${JSON.stringify(product)})'>
-                            בחר
-                        </button>
-                    </div>
-                </div>`;
-        }
-
-        function toggleProductSelection(product) {
-            const index = selectedProducts.findIndex(p => p.id === product.id);
-            if (index !== -1) {
-                selectedProducts.splice(index, 1);
-            } else {
-                selectedProducts.push(product);
-            }
-            updateProductList();
-        }
-
-        // Add products to the page dynamically
-        function updateProductList() {
-            const productListDiv = document.getElementById('product-list');
-            productListDiv.innerHTML = ''; // Clear the list
-            selectedProducts.forEach(product => {
-                productListDiv.appendChild(createProductItem(product));
-            });
         }
 
         function showToast(message, type = "danger", duration = 5000) {
@@ -566,14 +553,6 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
             }, duration);
         }
 
-        function createToastContainer() {
-            const container = document.createElement('div');
-            container.id = 'toastContainer';
-            container.classList.add('toast-container', 'position-fixed', 'top-0', 'end-0', 'p-3');
-            document.body.appendChild(container);
-            return container;
-        }
-
         function moveToStep2() {
             if (!newOrder.customerNO) return showToast(ERROR_MESSAGE);
             orderCode = generateOrderId(selectedCustomer.firstName);
@@ -596,6 +575,7 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
 
         async function submitOrder(event) {
             event.preventDefault();
+            console.log(products);
             Object.assign(newOrder, {
                 orderDetails: elements.orderDetails.value || "",
                 notes: elements.notes.value || "",
@@ -615,9 +595,8 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
 
                 const data = await response.json();
 
-                // If response contains an error, handle it
                 if (data.errors) {
-                    handleErrorResponse(data.errors);  // Handle error using the custom function
+                    handleErrorResponse(data.errors);
                 } else {
                     const successStep = document.getElementById("success-step");
                     successStep.querySelector("#order-number").textContent = orderCode;
@@ -631,21 +610,18 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
                 hide(elements.loading);
             }
         }
-        document.getElementById("copy-btn").addEventListener("click", copyOrderNumber);
-        document.getElementById("saveMaterialBtn").addEventListener("click", saveMaterial);
+
         function copyOrderNumber() {
             const orderNumber = elements.orderNumber.innerText;
             navigator.clipboard.writeText(orderNumber).then(() => {
-                const copyBtn = document.querySelector(".copy-btn");
-                const icon = copyBtn.querySelector("i");
-                copyBtn.classList.add("copied");
+                const icon = elements.copyBtn.querySelector("i");
+                elements.copyBtn.classList.add("copied");
 
-                // Change icon temporarily
                 icon.classList.remove("fa-copy");
                 icon.classList.add("fa-check");
 
                 setTimeout(() => {
-                    copyBtn.classList.remove("copied");
+                    elements.copyBtn.classList.remove("copied");
                     icon.classList.remove("fa-check");
                     icon.classList.add("fa-copy");
                 }, 1500);
@@ -653,12 +629,8 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
         }
 
         function handleErrorResponse(error) {
-            // Assuming 'error' is already parsed and is an array of error objects
             if (Array.isArray(error) && error.length > 0) {
-                // Extract the first error message from the array
-                const errorMessage = error[0].message || "שגיאה לא ידועה"; // Default error message if no message is found
-
-                // Show the error message in a toast
+                const errorMessage = error[0].message || "שגיאה לא ידועה";
                 showToast(errorMessage);
             } else {
                 showToast("שגיאה בלתי צפויה, אנא נסה שנית.");
@@ -712,42 +684,12 @@ import { status, json, show, hide, HEADERS, formatDate, ERROR_MESSAGE } from "./
                 errorAlert: document.getElementById("error"),
                 statusSelect: document.getElementById("status"),
                 notes: document.getElementById("notes"),
+                copyBtn: document.getElementById("copy-btn"),
                 orderDetails: document.getElementById("orderDetails"),
                 selectedProductsDiv: document.getElementById('selected-products'),
-                selectedProductsCount: document.getElementById('selected-products-count')
+                selectedProductsCount: document.getElementById('selected-products-count'),
+                toastContainer: document.getElementById('toastContainer') || createToastContainer(),
             };
-        }
-
-        function showToast(message) {
-            // Create a new toast element
-            const toastElement = document.createElement('div');
-            toastElement.classList.add('toast');
-            toastElement.classList.add('align-items-center');
-            toastElement.classList.add('text-bg-danger');
-            toastElement.classList.add('border-0');
-            toastElement.setAttribute('role', 'alert');
-            toastElement.setAttribute('aria-live', 'assertive');
-            toastElement.setAttribute('aria-atomic', 'true');
-            toastElement.innerHTML = `
-              <div class="d-flex">
-                <div class="toast-body">
-                  ${message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-              </div>
-            `;
-
-            // Append the toast to the container
-            document.getElementById('toastContainer').appendChild(toastElement);
-
-            // Initialize the toast and show it
-            const toast = new bootstrap.Toast(toastElement);
-            toast.show();
-
-            // Remove the toast after it has disappeared (5 seconds)
-            setTimeout(() => {
-                toastElement.remove();
-            }, 5000);
         }
     });
 })();
