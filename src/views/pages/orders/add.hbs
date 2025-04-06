@@ -22,8 +22,7 @@
 
                     <div class="d-flex flex-wrap gap-2 justify-content-between mt-3">
                         <a role="button" id="go-back" href="/orders" class="btn border-3 border">חזור לדף ההזמנות</a>
-                            <button type="button" class="btn btn-primary next-step" id="nextToStep2"
-                                disabled>הבא</button>
+                        <button type="button" class="btn btn-primary next-step" id="nextToStep2" disabled>הבא</button>
                     </div>
                 </div>
 
@@ -60,8 +59,8 @@
                         <!-- Category Filter -->
                         <div id="category-filter"></div>
 
-                        <!-- Product List -->
-                        <div id="product-list" class="row mt-3"></div>
+                    
+
 
                         <!-- Selected Products -->
                         <h3>מוצרים נבחרים: <span id="selected-products-count">0</span></h3>
@@ -125,6 +124,44 @@
     </div>
 </div>
 
+<!-- Product Modal -->
+<!-- Modal -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content rounded-4 shadow-sm">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title" id="productModalLabel">בחר מוצר</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="סגור"></button>
+            </div>
+            <div class="modal-body">
+                <div id="product-list" class="row g-3"></div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between">
+                <small class="text-muted">בחר מוצר מהרשימה למטה</small>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">סגור</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Material Modal -->
+<div class="modal fade" id="materialModal" tabindex="-1" aria-labelledby="materialModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Materials</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Material inputs can go here -->
+                <input type="text" class="form-control" placeholder="Material name...">
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal for managing product materials -->
 <div class="modal fade" id="materialModal" tabindex="-1" aria-labelledby="materialModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -152,6 +189,22 @@
 </div>
 
 <style>
+    .product-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .product-card:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-img {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
     .copy-btn {
         background: none;
         border: none;

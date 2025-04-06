@@ -51,6 +51,7 @@ const show = (element) => element.classList.remove("d-none");
 const hide = (element) => element.classList.add("d-none");
 
 const json = (response) => response.json();
+const fetchData = async (url) => await fetch(url, { headers: HEADERS }).then(status).then(json);
 
 const formatDate = (dateString) => {
     if (!dateString) return null;
@@ -116,4 +117,4 @@ function serverErrorHandler(error, deleteRequest = false) {
     getMsgWarning(errorMessage, "Error");
 }
 
-export { HEADERS, ERROR_MESSAGE, createToastContainer, showToast, isHiddenElement, formatDate, status, json, serverErrorHandler, hide, show, getMsgWarning };
+export { HEADERS, ERROR_MESSAGE, fetchData, createToastContainer, showToast, isHiddenElement, formatDate, status, json, serverErrorHandler, hide, show, getMsgWarning };
